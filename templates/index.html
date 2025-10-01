@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Parallel Web Crawler</title>
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body { background-color: #f8f9fa; }
+        .container { margin-top: 30px; }
+        .card { border-radius: 12px; box-shadow: 0px 2px 8px rgba(0,0,0,0.08); }
+        table { font-size: 14px; }
+        thead th { background: #0d6efd; color: white; }
+        .stat-number { font-size: 1.8rem; font-weight: 600; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="text-center mb-4">🌐 Parallel Web Crawler</h1>
+
+    <!-- Stats Section -->
+    <div class="row mb-4 g-3">
+        <div class="col-md-4">
+            <div class="card p-3">
+                <h6 class="mb-1">Total URLs Crawled</h6>
+                <div class="stat-number text-primary">{{ url_count | default(0) }}</div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card p-3">
+                <h6 class="mb-2">Execution Time</h6>
+                <div class="d-flex gap-3">
+                    <div><strong>Sequential:</strong> {{ seq_time | default(0) }} s</div>
+                    <div><strong>Parallel:</strong> {{ par_time | default(0) }} s</div>
+                    <div><strong>Speedup:</strong>
+                        {% if par_time and par_time != 0 %}
+                            {{ (seq_time / par_time) | round(2) }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="row mb-4 g-3">
+        <div class="col-md-6">
+            <div class="card p-3">
+                <h6 class="mb-2">Execution Time Comparison</h6>
+                <canvas id="timeChart" width="400" height="250"></canvas>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card p-3">
+                <h6 class="mb-2">Crawl Status</h6>
+                <canvas id="statusChart" width="400" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="card p-3">
+                <h6 class="mb-3">Sequential Results</h6>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover mb-0">
+                        <thead>
+                            <tr><th>URL</th><th>Title</th><th>Links</th></tr>
+                        </thead>
+                        <tbody>
+                        {% for r in seq_results %}
+                            <tr>
+                                <td style="max-width:220px; word-break:break-word;">{{ r.url }}</td>
+                                <td style="max-width:320px; word-break:break-word;">{{ r.title }}</td>
+                                <td>{{ r.links }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card p-3">
+                <h6 class="mb-3">Parallel Results</h6>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover mb-0">
+                        <thead>
+                            <tr><th>URL</th><th>Title</th><th>Links</th></tr>
+                        </thead>
+                        <tbody>
+                        {% for r in par_results %}
+                            <tr>
+                                <td style="max-width:220px; word-break:break-word;">{{ r.url }}</td>
+                                <td style="max-width:320px; word-break:break-word;">{{ r.title }}</td>
+                                <td>{{ r.links }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Use tojson + default in template to ensure these are valid JS values.
+    const seqTime = {{ seq_time | default(0) | tojson }};
+    const parTime = {{ par_time | default(0) | tojson }};
+    const successCount = {{ success_count | default(0) | tojson }};
+    const failCount = {{ fail_count | default(0) | tojson }};
+
+    // Bar Chart (Sequential vs Parallel Time)
+    const timeCtx = document.getElementById('timeChart').getContext('2d');
+    new Chart(timeCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Sequential', 'Parallel'],
+            datasets: [{
+                label: 'Execution Time (s)',
+                data: [seqTime, parTime],
+                backgroundColor: ['#dc3545', '#198754']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+
+    // Pie Chart (Success vs Fail)
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    new Chart(statusCtx, {
+        type: 'pie',
+        data: {
+            labels: ['Success', 'Failed'],
+            datasets: [{
+                data: [successCount, failCount],
+                backgroundColor: ['#0d6efd', '#ffc107']
+            }]
+        },
+        options: { responsive: true }
+    });
+</script>
+
+</body>
+</html>

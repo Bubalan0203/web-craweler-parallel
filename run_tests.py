@@ -1,0 +1,31 @@
+#!/usr/bin/env python3
+
+import sys
+import os
+
+print("=" * 60)
+print("Web Crawler - Test Information")
+print("=" * 60)
+print()
+print("This project includes comprehensive unit tests:")
+print()
+print("Test Files:")
+print("  - test_crawler.py: Tests for crawler functionality")
+print("  - test_config.py: Tests for configuration management")
+print()
+print("To run the tests, execute:")
+print("  python -m unittest discover -s . -p 'test_*.py' -v")
+print()
+print("Test Coverage:")
+print("  - Sequential crawling")
+print("  - Threaded crawling")
+print("  - Async crawling")
+print("  - Error handling and retries")
+print("  - Configuration loading")
+print("  - URL fetching and parsing")
+print()
+print("=" * 60)
+print()
+print("Note: Ensure all dependencies are installed:")
+print("  pip install -r requirements.txt")
+print()
